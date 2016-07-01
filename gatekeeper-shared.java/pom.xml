@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>gatekeeper-shared.java</artifactId>
+	<groupId>at.stefl.gatekeeper.shared</groupId>
+	<parent>
+		<artifactId>gatekeeper-parent.java</artifactId>
+		<groupId>at.stefl.gatekeeper</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<dependencies>
+		<dependency>
+			<artifactId>gson</artifactId>
+			<groupId>com.google.code.gson</groupId>
+			<version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<artifactId>Java-WebSocket</artifactId>
+			<groupId>org.java-websocket</groupId>
+			<version>1.3.0</version>
+		</dependency>
+	</dependencies>
+</project>
