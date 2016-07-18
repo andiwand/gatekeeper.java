@@ -12,8 +12,8 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>at.stefl.gatekeeper</groupId>
 			<artifactId>gatekeeper-shared.java</artifactId>
-			<groupId>at.stefl.gatekeeper.shared</groupId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
