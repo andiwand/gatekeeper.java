@@ -1,4 +1,4 @@
-package at.stefl.gatekeeper.server.hardware;
+package at.stefl.gatekeeper.server.hardware.raspi;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,11 +13,12 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 import at.stefl.gatekeeper.shared.inteface.Door;
+import at.stefl.gatekeeper.shared.inteface.Intercom;
 
-public class HardwareDoor implements Door {
+public class RaspiGpioDoor implements Door {
 
 	private final String name;
-	private final HardwareIntercom intercom;
+	private final Intercom intercom;
 
 	private final GpioController gpio;
 	private final GpioPinDigitalInput bellPin;
@@ -32,13 +33,11 @@ public class HardwareDoor implements Door {
 		}
 	};
 
-	public HardwareDoor(String name, Integer bellPin, Integer unlockPin, HardwareIntercom intercom) {
+	public RaspiGpioDoor(String name, Integer bellPin, Integer unlockPin, Intercom intercom) {
 		this.name = name;
 		this.intercom = intercom;
-		
-		this.gpio = null;
 
-//		this.gpio = GpioFactory.getInstance();
+		this.gpio = GpioFactory.getInstance();
 		if (bellPin == null) {
 			this.bellPin = null;
 		} else {
@@ -64,7 +63,7 @@ public class HardwareDoor implements Door {
 		return name;
 	}
 
-	public HardwareIntercom getIntercom() {
+	public Intercom getIntercom() {
 		return intercom;
 	}
 
@@ -81,7 +80,7 @@ public class HardwareDoor implements Door {
 	}
 
 	public boolean hasUnlock() {
-		return true;//return unlockPin != null;
+		return unlockPin != null;
 	}
 
 	public boolean hasIntercom() {
@@ -95,7 +94,7 @@ public class HardwareDoor implements Door {
 	}
 
 	public void unlock() {
-		System.out.println("unlock " + name);
+		// TODO: unlock
 
 		for (Listener listener : listeners) {
 			listener.unlocked(this);

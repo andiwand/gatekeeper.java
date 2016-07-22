@@ -8,14 +8,13 @@ import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 
 import at.stefl.gatekeeper.shared.audio.AudioFormat;
-import at.stefl.gatekeeper.shared.audio.AudioHelper;
 import at.stefl.gatekeeper.shared.audio.AudioInputDevice;
 import at.stefl.gatekeeper.shared.audio.AudioOutputDevice;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.audio.AudioPipe;
 import at.stefl.gatekeeper.shared.inteface.Intercom;
 
-public class HardwareIntercom implements Intercom {
+public class JavaIntercom implements Intercom {
 
 	private final AudioOutputDevice speaker;
 	private final AudioInputDevice microphone;
@@ -23,11 +22,7 @@ public class HardwareIntercom implements Intercom {
 
 	private AudioPipe pipe;
 
-	public HardwareIntercom(String speaker, String microphone) {
-		this(AudioHelper.getSourceLineInfo(speaker), AudioHelper.getTargetLineInfo(microphone));
-	}
-
-	public HardwareIntercom(Line.Info speaker, Line.Info microphone) {
+	public JavaIntercom(Line.Info speaker, Line.Info microphone) {
 		if (speaker == null)
 			throw new NullPointerException();
 		if (microphone == null)

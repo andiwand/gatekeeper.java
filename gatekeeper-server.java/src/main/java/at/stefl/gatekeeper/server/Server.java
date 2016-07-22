@@ -4,29 +4,27 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import at.stefl.gatekeeper.server.hardware.HardwareDoor;
-import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
-import at.stefl.gatekeeper.shared.Constants;
+import at.stefl.gatekeeper.server.hardware.DoorFactory;
+import at.stefl.gatekeeper.server.hardware.IntercomFactory;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.exception.IntercomLockedException;
 import at.stefl.gatekeeper.shared.exception.RemoteClosedException;
+import at.stefl.gatekeeper.shared.inteface.AbstractDoor;
+import at.stefl.gatekeeper.shared.inteface.AbstractIntercom;
+import at.stefl.gatekeeper.shared.inteface.AbstractRemote;
 import at.stefl.gatekeeper.shared.inteface.Door;
 import at.stefl.gatekeeper.shared.inteface.Intercom;
 import at.stefl.gatekeeper.shared.inteface.Remote;
-import at.stefl.gatekeeper.shared.util.ListenerUtil;
 
 // TODO: synchronize listeners
 public class Server implements Remote {
 
-	private class RemoteImpl implements Remote {
+	private class RemoteImpl extends AbstractRemote {
 		private final Map<String, DoorImpl> doors;
 		private final Collection<? extends Door> doorsRead;
-		private final List<Remote.Listener> listeners;
 
 		private final Object lock;
 		private boolean closed;
@@ -34,12 +32,11 @@ public class Server implements Remote {
 		public RemoteImpl() {
 			this.doors = new HashMap<String, Server.DoorImpl>();
 			this.doorsRead = Collections.unmodifiableCollection(this.doors.values());
-			this.listeners = new LinkedList<Remote.Listener>();
 
 			this.lock = new Object();
 			this.closed = false;
 
-			for (HardwareDoor door : Server.this.getDoors()) {
+			for (Door door : Server.this.getDoors()) {
 				DoorImpl doorInterface = new DoorImpl(this, door);
 				this.doors.put(door.getName(), doorInterface);
 			}
@@ -60,16 +57,6 @@ public class Server implements Remote {
 			return doors.get(door);
 		}
 
-		public void addListener(Listener listener) {
-			checkClosed();
-			listeners.add(listener);
-		}
-
-		public void removeListener(Listener listener) {
-			checkClosed();
-			listeners.remove(listener);
-		}
-
 		public void checkClosed() {
 			if (closed)
 				throw new RemoteClosedException();
@@ -80,6 +67,7 @@ public class Server implements Remote {
 		}
 
 		// TODO: clear or set properties null?
+		// TODO: clear listeners?
 		public void close(boolean client) {
 			synchronized (lock) {
 				if (closed)
@@ -90,36 +78,33 @@ public class Server implements Remote {
 				}
 
 				doors.clear();
-				listeners.clear();
 
 				destroyRemote(this);
 				closed = true;
-				ListenerUtil.fireRemoteClosed(listeners, this, client);
+				fireClosed(this, client);
 			}
 		}
 	}
 
-	private class DoorImpl implements Door {
+	private class DoorImpl extends AbstractDoor {
 		private final RemoteImpl remote;
-		private final HardwareDoor door;
+		private final Door door;
 		private final IntercomImpl intercom;
-		private final List<Door.Listener> listeners;
 
 		private final Door.Listener listener = new Door.Listener() {
 			public void bell(Door door) {
-				ListenerUtil.fireDoorBell(listeners, door);
+				fireBell(door);
 			}
 
 			public void unlocked(Door door) {
-				ListenerUtil.fireDoorUnlocked(listeners, door);
+				fireUnlocked(door);
 			}
 		};
 
-		public DoorImpl(RemoteImpl remote, HardwareDoor door) {
+		public DoorImpl(RemoteImpl remote, Door door) {
 			this.remote = remote;
 			this.door = door;
 			this.intercom = new IntercomImpl(this, door.getIntercom());
-			this.listeners = new LinkedList<Door.Listener>();
 
 			synchronized (this.door) {
 				this.door.addListener(listener);
@@ -151,16 +136,6 @@ public class Server implements Remote {
 			return door.hasIntercom();
 		}
 
-		public void addListener(Listener listener) {
-			remote.checkClosed();
-			listeners.add(listener);
-		}
-
-		public void removeListener(Listener listener) {
-			remote.checkClosed();
-			listeners.remove(listener);
-		}
-
 		public void unlock() {
 			synchronized (remote.lock) {
 				remote.checkClosed();
@@ -168,37 +143,31 @@ public class Server implements Remote {
 			}
 		}
 
+		// TODO: clear listeners?
 		private void closeInterface() {
 			remote.checkClosed();
 			intercom.closeInterface();
-			listeners.clear();
-
-			synchronized (door) {
-				this.door.removeListener(listener);
-			}
 		}
 	}
 
 	// TODO; synchronize on separate objects
-	private class IntercomImpl implements Intercom {
+	private class IntercomImpl extends AbstractIntercom {
 		private final DoorImpl door;
-		private final HardwareIntercom intercom;
-		private final List<Intercom.Listener> listeners;
+		private final Intercom intercom;
 
 		private final Intercom.Listener listener = new Intercom.Listener() {
 			public void opened(Intercom intercom) {
-				ListenerUtil.fireIntercomOpened(listeners, intercom);
+				fireOpened(intercom);
 			}
 
 			public void closed(Intercom intercom) {
-				ListenerUtil.fireIntercomClosed(listeners, intercom);
+				fireClosed(intercom);
 			}
 		};
 
-		public IntercomImpl(DoorImpl doorInterface, HardwareIntercom intercom) {
+		public IntercomImpl(DoorImpl doorInterface, Intercom intercom) {
 			this.door = doorInterface;
 			this.intercom = intercom;
-			this.listeners = new LinkedList<Intercom.Listener>();
 
 			synchronized (this.intercom) {
 				this.intercom.addListener(listener);
@@ -208,16 +177,6 @@ public class Server implements Remote {
 		public boolean isOpen() {
 			door.remote.checkClosed();
 			return intercom.isOpen();
-		}
-
-		public void addListener(Listener listener) {
-			door.remote.checkClosed();
-			listeners.add(listener);
-		}
-
-		public void removeListener(Listener listener) {
-			door.remote.checkClosed();
-			listeners.remove(listener);
 		}
 
 		public AudioOutputStream open(AudioOutputStream microphone) {
@@ -258,41 +217,37 @@ public class Server implements Remote {
 			}
 		}
 
+		// TODO: clear listeners?
 		private void closeInterface() {
 			door.remote.checkClosed();
 			close();
-			listeners.clear();
-
-			synchronized (this.intercom) {
-				this.intercom.removeListener(listener);
-			}
 		}
 	}
 
 	private String name;
-	private final Map<String, HardwareDoor> doors;
-	private final Collection<HardwareDoor> doorsRead;
+	private final Map<String, Door> doors;
+	private final Collection<Door> doorsRead;
 
 	private final Set<RemoteImpl> remotes;
-	private final Map<HardwareIntercom, RemoteImpl> intercomLocks;
+	private final Map<Intercom, RemoteImpl> intercomLocks;
 
 	public Server() {
-		this.doors = new HashMap<String, HardwareDoor>();
+		this.doors = new HashMap<String, Door>();
 		this.doorsRead = Collections.unmodifiableCollection(this.doors.values());
 
 		this.remotes = new HashSet<RemoteImpl>();
-		this.intercomLocks = new HashMap<HardwareIntercom, RemoteImpl>();
+		this.intercomLocks = new HashMap<Intercom, RemoteImpl>();
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public Collection<HardwareDoor> getDoors() {
+	public Collection<Door> getDoors() {
 		return doorsRead;
 	}
 
-	public HardwareDoor getDoor(String door) {
+	public Door getDoor(String door) {
 		return doors.get(door);
 	}
 
@@ -308,15 +263,16 @@ public class Server implements Remote {
 		this.name = config.name;
 
 		for (ServerConfig.Door doorConfig : config.doors) {
-			HardwareIntercom intercom = null;
+			Intercom intercom = null;
 			if (doorConfig.intercom != null) {
-				intercom = new HardwareIntercom(doorConfig.intercom.speaker, doorConfig.intercom.microphone);
+				intercom = IntercomFactory.create(doorConfig.intercom.speaker, doorConfig.intercom.microphone);
 				// TODO: set audio format
-				intercom.init(Constants.AUDIO_FORMAT, Constants.AUDIO_BUFFER_SIZE, Constants.AUDIO_FORMAT,
-						Constants.AUDIO_BUFFER_SIZE);
+				// intercom.init(Constants.AUDIO_FORMAT,
+				// Constants.AUDIO_BUFFER_SIZE, Constants.AUDIO_FORMAT,
+				// Constants.AUDIO_BUFFER_SIZE);
 			}
 
-			HardwareDoor door = new HardwareDoor(doorConfig.name, doorConfig.bellPin, doorConfig.unlockPin, intercom);
+			Door door = DoorFactory.create(doorConfig.name, doorConfig.bellPin, doorConfig.unlockPin, intercom);
 			doors.put(doorConfig.name, door);
 		}
 	}

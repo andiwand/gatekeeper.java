@@ -1,4 +1,4 @@
-package at.stefl.gatekeeper.server.hardware;
+package at.stefl.gatekeeper.server.hardware.raspi;
 
 import com.pi4j.io.gpio.Pin;
 import com.pi4j.io.gpio.RaspiPin;
