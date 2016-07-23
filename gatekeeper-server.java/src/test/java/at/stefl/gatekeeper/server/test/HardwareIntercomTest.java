@@ -1,7 +1,6 @@
 package at.stefl.gatekeeper.server.test;
 
 import at.stefl.gatekeeper.server.hardware.JavaIntercom;
-import at.stefl.gatekeeper.shared.Constants;
 import at.stefl.gatekeeper.shared.audio.AudioHelper;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.audio.ForwardAudioOutputStream;
@@ -15,8 +14,7 @@ public class HardwareIntercomTest {
 		JavaIntercom intercom = new JavaIntercom(AudioHelper.getSourceLineInfo(speakerName),
 				AudioHelper.getTargetLineInfo(microphoneName));
 
-		intercom.init(Constants.AUDIO_FORMAT, Constants.AUDIO_BUFFER_SIZE, Constants.AUDIO_FORMAT,
-				Constants.AUDIO_BUFFER_SIZE);
+		intercom.init();
 
 		ForwardAudioOutputStream forward = new ForwardAudioOutputStream();
 		AudioOutputStream speaker = intercom.open(forward);

@@ -1,24 +1,24 @@
 package at.stefl.gatekeeper.server.hardware;
 
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 
+import at.stefl.gatekeeper.shared.Constants;
 import at.stefl.gatekeeper.shared.audio.AudioFormat;
 import at.stefl.gatekeeper.shared.audio.AudioInputDevice;
 import at.stefl.gatekeeper.shared.audio.AudioOutputDevice;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.audio.AudioPipe;
-import at.stefl.gatekeeper.shared.inteface.Intercom;
 
-public class JavaIntercom implements Intercom {
+public class JavaIntercom extends HardwareIntercom {
 
 	private final AudioOutputDevice speaker;
 	private final AudioInputDevice microphone;
-	private final Set<Listener> listeners;
+
+	private AudioFormat format;
+	private int buffer;
 
 	private AudioPipe pipe;
 
@@ -28,42 +28,44 @@ public class JavaIntercom implements Intercom {
 		if (microphone == null)
 			throw new NullPointerException();
 
+		this.format = Constants.AUDIO_FORMAT;
+		this.buffer = Constants.AUDIO_BUFFER_SIZE;
+
 		try {
 			this.speaker = new AudioOutputDevice(speaker);
 			this.microphone = new AudioInputDevice(microphone);
 		} catch (LineUnavailableException e) {
-			throw new IllegalStateException("cannot initiate lines", e);
+			throw new IllegalStateException("line unavailable", e);
 		}
-
-		this.listeners = new HashSet<Intercom.Listener>();
 	}
 
-	public void addListener(Listener listener) {
-		listeners.add(listener);
+	public AudioFormat getFormat() {
+		return format;
 	}
 
-	public void removeListener(Listener listener) {
-		listeners.remove(listener);
+	public int getBuffer() {
+		return buffer;
+	}
+
+	public void setFormat(AudioFormat format) {
+		this.format = format;
+	}
+
+	public void setBuffer(int buffer) {
+		this.buffer = buffer;
 	}
 
 	public boolean isInit() {
-		return speaker.isStarted() & microphone.isStarted();
+		return speaker.isOpen() & microphone.isOpen();
 	}
 
 	public boolean isOpen() {
 		return speaker.isStarted() | microphone.isStarted();
 	}
 
-	public boolean init(AudioFormat speakerFormat, int speakerBuffer, AudioFormat microphoneFormat,
-			int microphoneBuffer) {
-		if (!speaker.open(speakerFormat, speakerBuffer)) {
-			return false;
-		}
-		if (!microphone.open(microphoneFormat, microphoneBuffer)) {
-			speaker.close();
-			return false;
-		}
-		return true;
+	public void init() {
+		speaker.open(format, buffer);
+		microphone.open(format, buffer);
 	}
 
 	public void destroy() {
@@ -79,9 +81,7 @@ public class JavaIntercom implements Intercom {
 		this.microphone.start();
 		pipe.start();
 
-		for (Listener listener : listeners) {
-			listener.opened(this);
-		}
+		fireOpened(this);
 
 		return this.speaker.getStream();
 	}
@@ -95,12 +95,12 @@ public class JavaIntercom implements Intercom {
 			e.printStackTrace();
 		}
 
+		// TODO: flush
+
 		speaker.stop();
 		microphone.stop();
 
-		for (Listener listener : listeners) {
-			listener.closed(this);
-		}
+		fireClosed(this);
 	}
 
 }

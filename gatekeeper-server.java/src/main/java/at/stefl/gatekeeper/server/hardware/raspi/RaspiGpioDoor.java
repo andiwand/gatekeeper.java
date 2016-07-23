@@ -1,8 +1,5 @@
 package at.stefl.gatekeeper.server.hardware.raspi;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
@@ -12,19 +9,20 @@ import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
-import at.stefl.gatekeeper.shared.inteface.Door;
-import at.stefl.gatekeeper.shared.inteface.Intercom;
+import at.stefl.gatekeeper.server.hardware.HardwareDoor;
+import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
 
-public class RaspiGpioDoor implements Door {
+public class RaspiGpioDoor extends HardwareDoor {
 
 	private final String name;
-	private final Intercom intercom;
+	private final HardwareIntercom intercom;
+	private final Integer bellPin;
+	private final Integer unlockPin;
+	private final long unlockDuration;
 
-	private final GpioController gpio;
-	private final GpioPinDigitalInput bellPin;
-	private final GpioPinDigitalOutput unlockPin;
-
-	private final Set<Listener> listeners;
+	private GpioController gpio;
+	private GpioPinDigitalInput bell;
+	private GpioPinDigitalOutput unlock;
 
 	private final GpioPinListenerDigital bellListener = new GpioPinListenerDigital() {
 		public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
@@ -33,29 +31,29 @@ public class RaspiGpioDoor implements Door {
 		}
 	};
 
-	public RaspiGpioDoor(String name, Integer bellPin, Integer unlockPin, Intercom intercom) {
+	public RaspiGpioDoor(String name, Integer bellPin, Integer unlockPin, long unlockDuration,
+			HardwareIntercom intercom) {
 		this.name = name;
 		this.intercom = intercom;
-
-		this.gpio = GpioFactory.getInstance();
-		if (bellPin == null) {
-			this.bellPin = null;
-		} else {
-			this.bellPin = gpio.provisionDigitalInputPin(RaspiPinHelper.getPin(bellPin), "bell",
-					PinPullResistance.PULL_UP);
-			this.bellPin.addListener(bellListener);
-		}
-		this.unlockPin = (unlockPin == null) ? null
-				: gpio.provisionDigitalOutputPin(RaspiPinHelper.getPin(unlockPin), "unlock", PinState.HIGH);
-
-		this.listeners = new HashSet<Listener>();
+		this.bellPin = bellPin;
+		this.unlockPin = unlockPin;
+		this.unlockDuration = unlockDuration;
 	}
 
 	public void init() {
-		// TODO: init gpio controller
+		gpio = GpioFactory.getInstance();
+		if (bellPin == null) {
+			bell = null;
+		} else {
+			bell = gpio.provisionDigitalInputPin(RaspiPinHelper.getPin(bellPin), "bell", PinPullResistance.PULL_UP);
+			bell.addListener(bellListener);
+		}
+		if (unlockPin != null) {
+			unlock = gpio.provisionDigitalOutputPin(RaspiPinHelper.getPin(unlockPin), "unlock", PinState.HIGH);
+		}
 	}
 
-	public void destroy() {
+	public void destory() {
 		this.gpio.shutdown();
 	}
 
@@ -63,16 +61,8 @@ public class RaspiGpioDoor implements Door {
 		return name;
 	}
 
-	public Intercom getIntercom() {
+	public HardwareIntercom getIntercom() {
 		return intercom;
-	}
-
-	public void addListener(Listener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeListener(Listener listener) {
-		listeners.remove(listener);
 	}
 
 	public boolean hasBell() {
@@ -88,17 +78,12 @@ public class RaspiGpioDoor implements Door {
 	}
 
 	public void bell() {
-		for (Listener listener : listeners) {
-			listener.bell(this);
-		}
+		fireBell();
 	}
 
 	public void unlock() {
-		// TODO: unlock
-
-		for (Listener listener : listeners) {
-			listener.unlocked(this);
-		}
+		unlock.pulse(unlockDuration, false);
+		fireUnlocked();
 	}
 
 }

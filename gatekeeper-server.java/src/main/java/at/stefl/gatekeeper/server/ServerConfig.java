@@ -16,6 +16,7 @@ public class ServerConfig {
 		public String name;
 		public Integer bellPin;
 		public Integer unlockPin;
+		public long unlockDuration;
 		public Intercom intercom;
 	}
 
@@ -31,7 +32,6 @@ public class ServerConfig {
 
 	public static class WebServer {
 		public int port;
-		public String certificatePath;
 		public String rootPath;
 	}
 

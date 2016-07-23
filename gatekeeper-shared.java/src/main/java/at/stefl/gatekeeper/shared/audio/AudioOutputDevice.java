@@ -61,7 +61,7 @@ public class AudioOutputDevice {
 			line.open(new javax.sound.sampled.AudioFormat(format.getSampleRate(), format.getSampleSize() * 8,
 					format.getChannels(), format.isSigned(), format.isBigEndian()), buffer);
 		} catch (LineUnavailableException e) {
-			return false;
+			return false; // TODO: throw
 		}
 
 		return true;

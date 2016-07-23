@@ -19,15 +19,15 @@ public abstract class AbstractDoor implements Door {
 		listeners.remove(listener);
 	}
 
-	protected void fireBell(Door door) {
+	protected void fireBell() {
 		for (Door.Listener listener : listeners) {
-			listener.bell(door);
+			listener.bell(this);
 		}
 	}
 
-	protected void fireUnlocked(Door door) {
+	protected void fireUnlocked() {
 		for (Door.Listener listener : listeners) {
-			listener.unlocked(door);
+			listener.unlocked(this);
 		}
 	}
 
