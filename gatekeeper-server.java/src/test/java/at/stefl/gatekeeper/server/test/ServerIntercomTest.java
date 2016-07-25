@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import at.stefl.gatekeeper.server.Server;
 import at.stefl.gatekeeper.server.ServerConfig;
+import at.stefl.gatekeeper.server.hardware.test.TestDoorFactory;
 import at.stefl.gatekeeper.shared.Constants;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.inteface.Door;
@@ -18,11 +19,11 @@ public class ServerIntercomTest {
 		ServerConfig.Door doorConfig = new ServerConfig.Door();
 		doorConfig.name = "front";
 		doorConfig.intercom = new ServerConfig.Intercom();
-		doorConfig.intercom.speaker = "Lautsprecher/Kopfhörer (Realtek High Definition Audio)";
+		doorConfig.intercom.speaker = "Lautsprecher/Kopfhï¿½rer (Realtek High Definition Audio)";
 		doorConfig.intercom.microphone = "Mikrofon (Realtek High Definiti";
 		config.doors.add(doorConfig);
 
-		Server server = new Server();
+		Server server = new Server(new TestDoorFactory());
 		server.init(config);
 
 		Collection<? extends Door> doors = server.getDoors();

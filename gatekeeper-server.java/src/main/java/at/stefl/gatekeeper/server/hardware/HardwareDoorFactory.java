@@ -1,15 +1,9 @@
 package at.stefl.gatekeeper.server.hardware;
 
-import at.stefl.gatekeeper.server.hardware.raspi.RaspiGpioDoor;
+import at.stefl.gatekeeper.server.ServerConfig;
 
-public class HardwareDoorFactory {
+public abstract class HardwareDoorFactory {
 
-	public static HardwareDoor create(String name, Integer bellPin, Integer unlockPin, long unlockDuration,
-			HardwareIntercom intercom) {
-		return new RaspiGpioDoor(name, bellPin, unlockPin, unlockDuration, intercom);
-	}
-
-	private HardwareDoorFactory() {
-	}
+	public abstract HardwareDoor create(ServerConfig.Door doorConfig);
 
 }

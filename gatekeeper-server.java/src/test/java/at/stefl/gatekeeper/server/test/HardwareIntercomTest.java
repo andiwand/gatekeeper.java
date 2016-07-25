@@ -8,7 +8,7 @@ import at.stefl.gatekeeper.shared.audio.ForwardAudioOutputStream;
 public class HardwareIntercomTest {
 
 	public static void main(String[] args) throws Throwable {
-		String speakerName = "Lautsprecher/Kopfhörer (Realtek High Definition Audio)";
+		String speakerName = "Lautsprecher/Kopfh�rer (Realtek High Definition Audio)";
 		String microphoneName = "Mikrofon (Realtek High Definiti";
 
 		JavaIntercom intercom = new JavaIntercom(AudioHelper.getSourceLineInfo(speakerName),

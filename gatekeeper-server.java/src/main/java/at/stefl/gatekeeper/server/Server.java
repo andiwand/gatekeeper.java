@@ -10,7 +10,6 @@ import java.util.Set;
 import at.stefl.gatekeeper.server.hardware.HardwareDoor;
 import at.stefl.gatekeeper.server.hardware.HardwareDoorFactory;
 import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
-import at.stefl.gatekeeper.server.hardware.HardwareIntercomFactory;
 import at.stefl.gatekeeper.shared.exception.IntercomLockedException;
 import at.stefl.gatekeeper.shared.inteface.Door;
 import at.stefl.gatekeeper.shared.inteface.Intercom;
@@ -20,13 +19,15 @@ import at.stefl.gatekeeper.shared.inteface.Remote;
 public class Server {
 
 	String name;
+	private final HardwareDoorFactory doorFactory;
 	private final Map<String, HardwareDoor> doors;
 	private final Collection<HardwareDoor> doorsRead;
 
 	private final Set<ServerRemote> remotes;
 	private final Map<Intercom, ServerRemote> intercomLocks;
 
-	public Server() {
+	public Server(HardwareDoorFactory doorFactory) {
+		this.doorFactory = doorFactory;
 		this.doors = new HashMap<String, HardwareDoor>();
 		this.doorsRead = Collections.unmodifiableCollection(this.doors.values());
 
@@ -50,15 +51,7 @@ public class Server {
 		this.name = config.name;
 
 		for (ServerConfig.Door doorConfig : config.doors) {
-			// TODO: outsource to factory
-			HardwareIntercom intercom = null;
-			if (doorConfig.intercom != null) {
-				intercom = HardwareIntercomFactory.create(doorConfig.intercom.speaker, doorConfig.intercom.microphone);
-				intercom.init();
-			}
-
-			HardwareDoor door = HardwareDoorFactory.create(doorConfig.name, doorConfig.bellPin, doorConfig.unlockPin,
-					doorConfig.unlockDuration, intercom);
+			HardwareDoor door = doorFactory.create(doorConfig);
 			door.init();
 			doors.put(doorConfig.name, door);
 		}
