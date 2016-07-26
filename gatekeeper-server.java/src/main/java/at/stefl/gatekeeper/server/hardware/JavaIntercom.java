@@ -63,6 +63,14 @@ public class JavaIntercom extends HardwareIntercom {
 		return speaker.isStarted() | microphone.isStarted();
 	}
 
+	public AudioFormat getMicrophoneFormat() {
+		return format;
+	}
+
+	public AudioFormat getSpeakerFormat() {
+		return format;
+	}
+
 	public void init() {
 		speaker.open(format, buffer);
 		microphone.open(format, buffer);

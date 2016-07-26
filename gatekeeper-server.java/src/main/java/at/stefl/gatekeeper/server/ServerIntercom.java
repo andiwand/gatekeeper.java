@@ -1,6 +1,7 @@
 package at.stefl.gatekeeper.server;
 
 import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
+import at.stefl.gatekeeper.shared.audio.AudioFormat;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.inteface.AbstractIntercom;
 import at.stefl.gatekeeper.shared.inteface.Intercom;
@@ -36,6 +37,16 @@ public class ServerIntercom extends AbstractIntercom {
 	public boolean isOpen() {
 		remote.checkClosed();
 		return intercom.isOpen();
+	}
+
+	public AudioFormat getMicrophoneFormat() {
+		remote.checkClosed();
+		return intercom.getMicrophoneFormat();
+	}
+
+	public AudioFormat getSpeakerFormat() {
+		remote.checkClosed();
+		return intercom.getSpeakerFormat();
 	}
 
 	public AudioOutputStream open(AudioOutputStream microphone) {

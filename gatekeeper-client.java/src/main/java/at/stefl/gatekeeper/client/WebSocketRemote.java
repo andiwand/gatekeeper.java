@@ -16,8 +16,11 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import at.stefl.gatekeeper.shared.Constants;
+import at.stefl.gatekeeper.shared.audio.AudioFormat;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.exception.IntercomLockedException;
+import at.stefl.gatekeeper.shared.inteface.AbstractDoor;
+import at.stefl.gatekeeper.shared.inteface.AbstractIntercom;
 import at.stefl.gatekeeper.shared.inteface.Door;
 import at.stefl.gatekeeper.shared.inteface.Intercom;
 import at.stefl.gatekeeper.shared.inteface.Remote;
@@ -70,19 +73,20 @@ public class WebSocketRemote implements Remote {
 		}
 	}
 
-	private class DoorImpl implements Door {
+	private class DoorImpl extends AbstractDoor {
 		private final String name;
 		private final IntercomImpl intercom;
 		private final boolean hasBell;
 		private final boolean hasUnlock;
-		private final Set<Door.Listener> listeners;
 
-		public DoorImpl(String name, boolean hasBell, boolean hasUnlock, boolean hasIntercom) {
+		public DoorImpl(String name, InfoResponse.Door doorInfo) {
 			this.name = name;
-			this.intercom = hasIntercom ? new IntercomImpl(this) : null;
-			this.hasBell = hasBell;
-			this.hasUnlock = hasUnlock;
-			this.listeners = new HashSet<Door.Listener>();
+			this.hasBell = doorInfo.hasBell;
+			this.hasUnlock = doorInfo.hasUnlock;
+			if (doorInfo.intercom == null)
+				this.intercom = null;
+			else
+				this.intercom = new IntercomImpl(this, doorInfo.intercom);
 		}
 
 		public String getName() {
@@ -105,14 +109,6 @@ public class WebSocketRemote implements Remote {
 			return intercom != null;
 		}
 
-		public void addListener(Listener listener) {
-			listeners.add(listener);
-		}
-
-		public void removeListener(Listener listener) {
-			listeners.remove(listener);
-		}
-
 		public void unlock() {
 			if (!hasUnlock) {
 				// TODO: exception
@@ -123,13 +119,15 @@ public class WebSocketRemote implements Remote {
 		}
 	}
 
-	private class IntercomImpl implements Intercom {
+	private class IntercomImpl extends AbstractIntercom {
 		private final DoorImpl door;
-		private final Set<Intercom.Listener> listeners;
+		private final AudioFormat microphoneFormat;
+		private final AudioFormat speakerFormat;
 
-		public IntercomImpl(DoorImpl door) {
+		public IntercomImpl(DoorImpl door, InfoResponse.Intercom intercomInfo) {
 			this.door = door;
-			this.listeners = new HashSet<Intercom.Listener>();
+			this.microphoneFormat = intercomInfo.microphone;
+			this.speakerFormat = intercomInfo.speaker;
 		}
 
 		public boolean isOpen() {
@@ -138,12 +136,12 @@ public class WebSocketRemote implements Remote {
 			}
 		}
 
-		public void addListener(Listener listener) {
-			listeners.add(listener);
+		public AudioFormat getMicrophoneFormat() {
+			return microphoneFormat;
 		}
 
-		public void removeListener(Listener listener) {
-			listeners.remove(listener);
+		public AudioFormat getSpeakerFormat() {
+			return speakerFormat;
 		}
 
 		public AudioOutputStream open(AudioOutputStream microphone) {
@@ -273,8 +271,7 @@ public class WebSocketRemote implements Remote {
 		InfoResponse infoResponse = requestInfo();
 		name = infoResponse.name;
 		for (Map.Entry<String, InfoResponse.Door> entry : infoResponse.doors.entrySet()) {
-			DoorImpl door = new DoorImpl(entry.getKey(), entry.getValue().hasBell, entry.getValue().hasUnlock,
-					entry.getValue().hasIntercom);
+			DoorImpl door = new DoorImpl(entry.getKey(), entry.getValue());
 			doors.put(entry.getKey(), door);
 		}
 	}

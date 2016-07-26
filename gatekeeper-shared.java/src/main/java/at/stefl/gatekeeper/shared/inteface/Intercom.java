@@ -1,5 +1,6 @@
 package at.stefl.gatekeeper.shared.inteface;
 
+import at.stefl.gatekeeper.shared.audio.AudioFormat;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 
 public interface Intercom {
@@ -21,6 +22,10 @@ public interface Intercom {
 	public void addListener(Listener listener);
 
 	public void removeListener(Listener listener);
+
+	public AudioFormat getMicrophoneFormat();
+
+	public AudioFormat getSpeakerFormat();
 
 	public boolean isOpen();
 

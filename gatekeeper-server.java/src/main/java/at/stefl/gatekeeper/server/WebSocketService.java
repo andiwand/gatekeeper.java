@@ -201,17 +201,25 @@ public class WebSocketService extends WebSocketServer {
 		this.server = server;
 		this.workers = new HashMap<WebSocket, WebSocketService.Worker>();
 
-		// TODO: move
-		infoResponse = new InfoResponse();
+		this.infoResponse = createInfo();
+	}
+
+	private InfoResponse createInfo() {
+		InfoResponse infoResponse = new InfoResponse();
 		infoResponse.name = server.getName();
 		infoResponse.doors = new HashMap<String, InfoResponse.Door>();
 		for (Door door : server.getDoors()) {
 			InfoResponse.Door doorInfo = new InfoResponse.Door();
 			doorInfo.hasBell = door.hasBell();
 			doorInfo.hasUnlock = door.hasUnlock();
-			doorInfo.hasIntercom = door.hasIntercom();
+			if (door.hasIntercom()) {
+				doorInfo.intercom = new InfoResponse.Intercom();
+				doorInfo.intercom.microphone = door.getIntercom().getMicrophoneFormat();
+				doorInfo.intercom.speaker = door.getIntercom().getSpeakerFormat();
+			}
 			infoResponse.doors.put(door.getName(), doorInfo);
 		}
+		return infoResponse;
 	}
 
 	@Override
