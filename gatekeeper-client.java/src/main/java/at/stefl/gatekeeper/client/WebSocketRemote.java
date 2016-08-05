@@ -136,6 +136,10 @@ public class WebSocketRemote implements Remote {
 			}
 		}
 
+		public Door getDoor() {
+			return door;
+		}
+
 		public AudioFormat getMicrophoneFormat() {
 			return microphoneFormat;
 		}

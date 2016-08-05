@@ -1,5 +1,6 @@
 package at.stefl.gatekeeper.server.hardware.test;
 
+import at.stefl.gatekeeper.server.hardware.HardwareDoor;
 import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
 import at.stefl.gatekeeper.shared.audio.AudioFormat;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
@@ -22,6 +23,11 @@ public class TestIntercom extends HardwareIntercom {
 
 	public boolean isOpen() {
 		return false;
+	}
+
+	public HardwareDoor getDoor() {
+		// TODO: implement
+		return null;
 	}
 
 	public AudioFormat getMicrophoneFormat() {

@@ -19,13 +19,15 @@ public interface Intercom {
 		}
 	}
 
-	public void addListener(Listener listener);
-
-	public void removeListener(Listener listener);
+	public Door getDoor();
 
 	public AudioFormat getMicrophoneFormat();
 
 	public AudioFormat getSpeakerFormat();
+
+	public void addListener(Listener listener);
+
+	public void removeListener(Listener listener);
 
 	public boolean isOpen();
 

@@ -8,4 +8,8 @@ public abstract class HardwareIntercom extends AbstractIntercom {
 
 	public abstract void destroy();
 
+	public HardwareDoor getDoor() {
+		return null;
+	}
+
 }

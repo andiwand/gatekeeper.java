@@ -39,6 +39,10 @@ public class ServerIntercom extends AbstractIntercom {
 		return intercom.isOpen();
 	}
 
+	public ServerDoor getDoor() {
+		return door;
+	}
+
 	public AudioFormat getMicrophoneFormat() {
 		remote.checkClosed();
 		return intercom.getMicrophoneFormat();
