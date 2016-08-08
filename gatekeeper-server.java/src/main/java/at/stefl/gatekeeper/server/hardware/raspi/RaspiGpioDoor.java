@@ -10,12 +10,9 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 
 import at.stefl.gatekeeper.server.hardware.HardwareDoor;
-import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
 
 public class RaspiGpioDoor extends HardwareDoor {
 
-	private final String name;
-	private final HardwareIntercom intercom;
 	private final Integer bellPin;
 	private final Integer unlockPin;
 	private final long unlockDuration;
@@ -31,10 +28,7 @@ public class RaspiGpioDoor extends HardwareDoor {
 		}
 	};
 
-	public RaspiGpioDoor(String name, Integer bellPin, Integer unlockPin, long unlockDuration,
-			HardwareIntercom intercom) {
-		this.name = name;
-		this.intercom = intercom;
+	public RaspiGpioDoor(Integer bellPin, Integer unlockPin, long unlockDuration) {
 		this.bellPin = bellPin;
 		this.unlockPin = unlockPin;
 		this.unlockDuration = unlockDuration;
@@ -57,14 +51,6 @@ public class RaspiGpioDoor extends HardwareDoor {
 		this.gpio.shutdown();
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public HardwareIntercom getIntercom() {
-		return intercom;
-	}
-
 	public boolean hasBell() {
 		return bellPin != null;
 	}
@@ -73,17 +59,12 @@ public class RaspiGpioDoor extends HardwareDoor {
 		return unlockPin != null;
 	}
 
-	public boolean hasIntercom() {
-		return intercom != null;
-	}
-
 	public void bell() {
 		fireBell();
 	}
 
 	public void unlock() {
 		unlock.pulse(unlockDuration, false);
-		fireUnlocked();
 	}
 
 }

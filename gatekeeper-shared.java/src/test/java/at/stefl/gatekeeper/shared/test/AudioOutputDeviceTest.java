@@ -24,7 +24,7 @@ public class AudioOutputDeviceTest {
 
 		double frequency = 440;
 		double time = 10;
-		
+
 		double t = 0;
 
 		while (t < time) {

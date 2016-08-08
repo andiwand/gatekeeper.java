@@ -2,8 +2,8 @@ package at.stefl.gatekeeper.server.hardware;
 
 import at.stefl.gatekeeper.server.ServerConfig;
 
-public abstract class HardwareDoorFactory {
+public interface HardwareDoorFactory {
 
-	public abstract HardwareDoor create(ServerConfig.Door doorConfig);
+	public HardwareDoor createDoor(ServerConfig.Door doorConfig);
 
 }

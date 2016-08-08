@@ -21,6 +21,8 @@ public interface Intercom {
 
 	public Door getDoor();
 
+	public boolean isOpen();
+
 	public AudioFormat getMicrophoneFormat();
 
 	public AudioFormat getSpeakerFormat();
@@ -28,8 +30,6 @@ public interface Intercom {
 	public void addListener(Listener listener);
 
 	public void removeListener(Listener listener);
-
-	public boolean isOpen();
 
 	public AudioOutputStream open(AudioOutputStream microphone);
 

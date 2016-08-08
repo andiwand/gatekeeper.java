@@ -94,8 +94,6 @@ public class JavaIntercom extends HardwareIntercom {
 		this.microphone.start();
 		pipe.start();
 
-		fireOpened(this);
-
 		return this.speaker.getStream();
 	}
 
@@ -112,8 +110,6 @@ public class JavaIntercom extends HardwareIntercom {
 
 		speaker.stop();
 		microphone.stop();
-
-		fireClosed(this);
 	}
 
 }

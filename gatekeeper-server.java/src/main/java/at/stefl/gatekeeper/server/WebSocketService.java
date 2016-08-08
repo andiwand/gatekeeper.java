@@ -187,6 +187,7 @@ public class WebSocketService extends WebSocketServer {
 	}
 
 	private final Server server;
+	private final ServerRemote remote;
 	private final Map<WebSocket, Worker> workers;
 
 	private final InfoResponse infoResponse;
@@ -199,6 +200,7 @@ public class WebSocketService extends WebSocketServer {
 		super(new InetSocketAddress(port));
 
 		this.server = server;
+		this.remote = server.createRemote();
 		this.workers = new HashMap<WebSocket, WebSocketService.Worker>();
 
 		this.infoResponse = createInfo();
@@ -206,9 +208,9 @@ public class WebSocketService extends WebSocketServer {
 
 	private InfoResponse createInfo() {
 		InfoResponse infoResponse = new InfoResponse();
-		infoResponse.name = server.getName();
+		infoResponse.name = remote.getName();
 		infoResponse.doors = new HashMap<String, InfoResponse.Door>();
-		for (Door door : server.getDoors()) {
+		for (Door door : remote.getDoors()) {
 			InfoResponse.Door doorInfo = new InfoResponse.Door();
 			doorInfo.hasBell = door.hasBell();
 			doorInfo.hasUnlock = door.hasUnlock();

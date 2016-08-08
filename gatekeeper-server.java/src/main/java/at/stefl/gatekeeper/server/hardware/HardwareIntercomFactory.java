@@ -2,8 +2,8 @@ package at.stefl.gatekeeper.server.hardware;
 
 import at.stefl.gatekeeper.server.ServerConfig;
 
-public abstract class HardwareIntercomFactory {
+public interface HardwareIntercomFactory {
 
-	public abstract HardwareIntercom create(ServerConfig.Intercom intercomConfig);
+	public HardwareIntercom createIntercom(ServerConfig.Intercom intercomConfig);
 
 }

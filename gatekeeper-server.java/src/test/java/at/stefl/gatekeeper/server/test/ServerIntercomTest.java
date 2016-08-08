@@ -5,11 +5,13 @@ import java.util.Collection;
 
 import at.stefl.gatekeeper.server.Server;
 import at.stefl.gatekeeper.server.ServerConfig;
+import at.stefl.gatekeeper.server.hardware.JavaIntercomFactory;
 import at.stefl.gatekeeper.server.hardware.test.TestDoorFactory;
 import at.stefl.gatekeeper.shared.Constants;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
 import at.stefl.gatekeeper.shared.inteface.Door;
 import at.stefl.gatekeeper.shared.inteface.Intercom;
+import at.stefl.gatekeeper.shared.inteface.Remote;
 
 public class ServerIntercomTest {
 
@@ -23,10 +25,11 @@ public class ServerIntercomTest {
 		doorConfig.intercom.microphone = "Mikrofon (Realtek High Definiti";
 		config.doors.add(doorConfig);
 
-		Server server = new Server(new TestDoorFactory());
+		Server server = new Server(new TestDoorFactory(), new JavaIntercomFactory());
 		server.init(config);
 
-		Collection<? extends Door> doors = server.getDoors();
+		Remote remote = server.createRemote();
+		Collection<? extends Door> doors = remote.getDoors();
 		Door door = doors.iterator().next();
 		System.out.println(door);
 

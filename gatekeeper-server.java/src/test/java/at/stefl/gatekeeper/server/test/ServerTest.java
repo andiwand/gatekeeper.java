@@ -22,9 +22,9 @@ public class ServerTest {
 		doorConfig.intercom.microphone = "Mikrofon (Realtek High Definiti";
 		config.doors.add(doorConfig);
 
+		HardwareDoorFactory doorFactory = new RaspiGpioDoorFactory();
 		HardwareIntercomFactory intercomFactory = new JavaIntercomFactory();
-		HardwareDoorFactory doorFactory = new RaspiGpioDoorFactory(intercomFactory);
-		Server server = new Server(doorFactory);
+		Server server = new Server(doorFactory, intercomFactory);
 		server.init(config);
 
 		WebSocketService webSocketService = new WebSocketService(server);

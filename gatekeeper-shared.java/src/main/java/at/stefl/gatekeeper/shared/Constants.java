@@ -20,7 +20,7 @@ public class Constants {
 
 	public static final AudioFormat AUDIO_FORMAT = new AudioFormat(44100, 1, 1, true, true);
 	public static final double AUDIO_BUFFER_TIME = 0.1;
-	public static final int AUDIO_BUFFER_SIZE = 4096; //AUDIO_FORMAT.calculateBufferSize(AUDIO_BUFFER_TIME);
+	public static final int AUDIO_BUFFER_SIZE = 4096; // AUDIO_FORMAT.calculateBufferSize(AUDIO_BUFFER_TIME);
 
 	static {
 		try {

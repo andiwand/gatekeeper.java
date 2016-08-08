@@ -1,7 +1,5 @@
 package at.stefl.gatekeeper.server;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,72 +7,67 @@ import java.util.Set;
 
 import at.stefl.gatekeeper.server.hardware.HardwareDoor;
 import at.stefl.gatekeeper.server.hardware.HardwareDoorFactory;
+import at.stefl.gatekeeper.server.hardware.HardwareFactory;
 import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
+import at.stefl.gatekeeper.server.hardware.HardwareIntercomFactory;
 import at.stefl.gatekeeper.shared.exception.IntercomLockedException;
-import at.stefl.gatekeeper.shared.inteface.Door;
-import at.stefl.gatekeeper.shared.inteface.Intercom;
-import at.stefl.gatekeeper.shared.inteface.Remote;
 
 // TODO: synchronize listeners
 public class Server {
 
 	String name;
-	private final HardwareDoorFactory doorFactory;
-	private final Map<String, HardwareDoor> doors;
-	private final Collection<HardwareDoor> doorsRead;
+	private final HardwareFactory hardwareFactory;
 
+	private ServerRemote remote;
 	private final Set<ServerRemote> remotes;
-	private final Map<Intercom, ServerRemote> intercomLocks;
+	private final Map<HardwareIntercom, ServerRemote> intercomLocks;
 
-	public Server(HardwareDoorFactory doorFactory) {
-		this.doorFactory = doorFactory;
-		this.doors = new HashMap<String, HardwareDoor>();
-		this.doorsRead = Collections.unmodifiableCollection(this.doors.values());
+	public Server(HardwareDoorFactory doorFactory, HardwareIntercomFactory intercomFactory) {
+		this(new HardwareFactory(doorFactory, intercomFactory));
+	}
+
+	public Server(HardwareFactory hardwareFactory) {
+		this.hardwareFactory = hardwareFactory;
 
 		this.remotes = new HashSet<ServerRemote>();
-		this.intercomLocks = new HashMap<Intercom, ServerRemote>();
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Collection<HardwareDoor> getDoors() {
-		return doorsRead;
-	}
-
-	public Door getDoor(String door) {
-		return doors.get(door);
+		this.intercomLocks = new HashMap<HardwareIntercom, ServerRemote>();
 	}
 
 	public void init(ServerConfig config) {
-		this.name = config.name;
+		name = config.name;
+		remote = new ServerRemote(this);
 
 		for (ServerConfig.Door doorConfig : config.doors) {
-			HardwareDoor door = doorFactory.create(doorConfig);
-			door.init();
-			doors.put(doorConfig.name, door);
+			HardwareDoor hardwareDoor = hardwareFactory.createDoor(doorConfig);
+			HardwareIntercom hardwareIntercom = (doorConfig.intercom == null) ? null
+					: hardwareFactory.createIntercom(null);
+
+			hardwareDoor.init();
+			hardwareIntercom.init();
+
+			ServerDoor door = new ServerDoor(remote, doorConfig.name, hardwareDoor, hardwareIntercom);
+			remote.addDoor(door);
 		}
 	}
 
-	public Remote createRemote() {
-		ServerRemote remote = new ServerRemote(this);
+	public ServerRemote createRemote() {
+		ServerRemote result = remote.fork();
 		synchronized (remotes) {
-			remotes.add(remote);
+			remotes.add(result);
 		}
-		return remote;
-	}
-
-	void destroyRemote(ServerRemote remote) {
-		synchronized (remotes) {
-			remotes.remove(remote);
-		}
+		return result;
 	}
 
 	public void start() {
 	}
 
 	public void close() {
+	}
+
+	void removeRemote(ServerRemote remote) {
+		synchronized (remotes) {
+			remotes.remove(remote);
+		}
 	}
 
 	void reserveIntercom(ServerRemote remote, HardwareIntercom intercom) {

@@ -3,17 +3,13 @@ package at.stefl.gatekeeper.shared.network.packet;
 public class StandardPacket extends Packet<Object, StandardPacket.Type> {
 
 	public static enum Type implements Packet.Type<Object> {
-		SIGNAL_BEACON(BeaconSignal.class),
-		SIGNAL_DOOR(DoorSignal.class),
+		SIGNAL_BEACON(BeaconSignal.class), SIGNAL_DOOR(DoorSignal.class),
 
 		CLOSE_INTERCOM(null),
 
-		REQUEST_INFO(null),
-		REQUEST_UNLOCK(DoorRequest.class),
-		REQUEST_INTERCOM(DoorRequest.class),
+		REQUEST_INFO(null), REQUEST_UNLOCK(DoorRequest.class), REQUEST_INTERCOM(DoorRequest.class),
 
-		RESPONSE_INFO(InfoResponse.class),
-		RESPONSE_SIMPLE(SimpleResponse.class);
+		RESPONSE_INFO(InfoResponse.class), RESPONSE_SIMPLE(SimpleResponse.class);
 
 		private final Class<?> payloadClass;
 

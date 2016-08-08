@@ -19,15 +19,15 @@ public abstract class AbstractIntercom implements Intercom {
 		listeners.remove(listener);
 	}
 
-	protected void fireOpened(Intercom intercom) {
+	protected void fireOpened() {
 		for (Intercom.Listener listener : listeners) {
-			listener.opened(intercom);
+			listener.opened(this);
 		}
 	}
 
-	protected void fireClosed(Intercom intercom) {
+	protected void fireClosed() {
 		for (Intercom.Listener listener : listeners) {
-			listener.closed(intercom);
+			listener.closed(this);
 		}
 	}
 
