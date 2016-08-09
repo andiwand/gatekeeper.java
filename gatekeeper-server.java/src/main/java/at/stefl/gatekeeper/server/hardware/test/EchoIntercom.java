@@ -1,17 +1,14 @@
 package at.stefl.gatekeeper.server.hardware.test;
 
-import at.stefl.gatekeeper.server.hardware.HardwareDoor;
 import at.stefl.gatekeeper.server.hardware.HardwareIntercom;
 import at.stefl.gatekeeper.shared.audio.AudioFormat;
 import at.stefl.gatekeeper.shared.audio.AudioOutputStream;
+import at.stefl.gatekeeper.shared.audio.ForwardAudioOutputStream;
 
-// TODO: implement echo
-public class TestIntercom extends HardwareIntercom {
+public class EchoIntercom extends HardwareIntercom {
 
 	private AudioFormat audioFormat;
-
-	public TestIntercom() {
-	}
+	private boolean open;
 
 	public AudioFormat getAudioFormat() {
 		return audioFormat;
@@ -22,12 +19,7 @@ public class TestIntercom extends HardwareIntercom {
 	}
 
 	public boolean isOpen() {
-		return false;
-	}
-
-	public HardwareDoor getDoor() {
-		// TODO: implement
-		return null;
+		return open;
 	}
 
 	public AudioFormat getMicrophoneFormat() {
@@ -39,11 +31,14 @@ public class TestIntercom extends HardwareIntercom {
 	}
 
 	public AudioOutputStream open(AudioOutputStream microphone) {
-		return null;
+		if (open)
+			return null;
+		open = true;
+		return new ForwardAudioOutputStream(microphone);
 	}
 
 	public void close() {
-
+		open = false;
 	}
 
 	@Override

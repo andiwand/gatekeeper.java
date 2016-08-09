@@ -7,14 +7,20 @@ public class AudioFormat {
 	private final int channels;
 	private final boolean signed;
 	private final boolean bigEndian;
+	private final boolean floating;
 
 	public AudioFormat(float sampleRate, int sampleSize, int channels, boolean signed, boolean bigEndian) {
-		super();
+		this(sampleRate, sampleSize, channels, signed, bigEndian, false);
+	}
+
+	public AudioFormat(float sampleRate, int sampleSize, int channels, boolean signed, boolean bigEndian,
+			boolean floating) {
 		this.sampleRate = sampleRate;
 		this.sampleSize = sampleSize;
 		this.channels = channels;
 		this.signed = signed;
 		this.bigEndian = bigEndian;
+		this.floating = floating;
 	}
 
 	public float getSampleRate() {
@@ -35,6 +41,10 @@ public class AudioFormat {
 
 	public boolean isBigEndian() {
 		return bigEndian;
+	}
+
+	public boolean isFloating() {
+		return floating;
 	}
 
 	public int calculateBufferSize(double time) {

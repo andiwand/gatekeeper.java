@@ -6,6 +6,13 @@ public class ForwardAudioOutputStream extends AudioOutputStream {
 
 	private AudioOutputStream out;
 
+	public ForwardAudioOutputStream() {
+	}
+
+	public ForwardAudioOutputStream(AudioOutputStream out) {
+		this.out = out;
+	}
+
 	public void setOutput(AudioOutputStream out) {
 		this.out = out;
 	}

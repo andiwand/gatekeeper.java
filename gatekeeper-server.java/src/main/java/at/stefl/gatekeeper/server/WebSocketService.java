@@ -45,8 +45,7 @@ public class WebSocketService extends WebSocketServer {
 		private AudioOutputStream intercomMicrophone;
 
 		private final Remote.Listener listener = new Remote.Listener() {
-			public void closed(Remote serverInterface, boolean client) {
-				// TODO: ????
+			public void closed(Remote remote, boolean client) {
 				if (socket.isClosing() | socket.isClosed())
 					return;
 
